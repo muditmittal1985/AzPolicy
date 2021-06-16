@@ -1,0 +1,89 @@
+{
+ "properties": {
+  "displayName": "IRAS_SG_Policy_PreProd_Qualys_v1",
+  "policyType": "Custom",
+  "mode": "All",
+  "description": "XXX",
+  "metadata": {
+   "version": "1.0.0",
+   "createdBy": "1bddc9fc-1374-4bc7-a99b-0879347957c9",
+   "createdOn": "2021-05-16T00:45:57.6083599Z",
+   "updatedBy": "1bddc9fc-1374-4bc7-a99b-0879347957c9",
+   "updatedOn": "2021-05-16T00:46:17.687701Z",
+   "category": "Security Center"
+  },
+  "parameters": {},
+  "policyRule": {
+   "if": {
+    "field": "type",
+    "in": [
+     "Microsoft.Compute/virtualMachines",
+     "Microsoft.ClassicCompute/virtualMachines"
+    ]
+   },
+   "then": {
+    "effect": "deployIfNotExists",
+    "details": {
+     "type": "Microsoft.Compute/virtualMachines/extensions",
+     "roleDefinitionIds": [
+      "/providers/microsoft.authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+     ],
+     "existenceCondition": {
+      "allOf": [
+       {
+        "field": "Microsoft.Compute/virtualMachines/extensions/type",
+        "in": [
+         "WindowsAgent.AzureSecurityCenter",
+         "LinuxAgent.AzureSecurityCenter"
+        ]
+       },
+       {
+        "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+        "equals": "Qualys"
+       },
+       {
+        "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+        "equals": "Succeeded"
+       }
+      ]
+     },
+     "deployment": {
+      "properties": {
+       "mode": "Incremental",
+       "template": {
+        "contentVersion": "1.0.0.0",
+        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "parameters": {
+         "vmName": {
+          "type": "string"
+         },
+         "apiVersionByEnv": {
+          "type": "string"
+         }
+        },
+        "resources": [
+         {
+          "type": "Microsoft.Compute/virtualMachines/providers/serverVulnerabilityAssessments",
+          "name": "[concat(parameters('vmName'), '/Microsoft.Security/default')]",
+          "apiVersion": "[parameters('apiVersionByEnv')]"
+         }
+        ]
+       },
+       "parameters": {
+        "vmName": {
+         "value": "[field('name')]"
+        },
+        "apiVersionByEnv": {
+         "value": "2015-06-01-preview"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "id": "/subscriptions/2d80704f-ed03-40ab-b625-037e792774e5/providers/Microsoft.Authorization/policyDefinitions/d229ba93-1707-4f34-bb29-107cafa8d3ad",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "d229ba93-1707-4f34-bb29-107cafa8d3ad"
+}
